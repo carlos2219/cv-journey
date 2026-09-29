@@ -16,7 +16,8 @@ try:
         current_time = time.perf_counter()
         diff_time = current_time - previous_time
         fps = 1/diff_time
-        fps_smooth = 0.9 * fps_smooth + 0.1 * fps
+        alpha = 0.05 #fps low-pass filter alpha value, less=smooth
+        fps_smooth = (1-alpha) * fps_smooth + alpha * fps
         previous_time = current_time
         if ok:
             cv2.putText(frame, f"FPS: {fps_smooth:.1f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)

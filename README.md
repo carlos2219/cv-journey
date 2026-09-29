@@ -1,0 +1,1 @@
+This repo is the first approximation of my computer vision learning path. I'm being assisted by the best tutor nowadays which is Artificial Intelligence specifically Claude Code which acts a expert professor and a great personalized advisor.

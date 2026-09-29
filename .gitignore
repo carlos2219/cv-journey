@@ -8,6 +8,8 @@ wheels/
 
 #data
 data/
+*.pt
+
 
 # Virtual environments
 .venv

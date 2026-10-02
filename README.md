@@ -16,6 +16,8 @@ and it reviews and explains.
 | 4 | Train my own detector on a custom dataset | ⏳ |
 | 5 | Edge deployment: ONNX, TensorRT, Docker, Jetson | ⏳ |
 
+Notes: [concepts glossary](docs/concepts.md) · [experiment log](EXPERIMENTS.md)
+
 ## Setup
 
 Requires [uv](https://docs.astral.sh/uv/) and an NVIDIA GPU (the scripts also run on CPU).

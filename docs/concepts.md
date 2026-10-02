@@ -85,26 +85,17 @@ Organized by the step where each term first came up.
 
 ## Detection metrics (Step 4)
 
-Each term builds on the one before it.
+Deep dive with a worked example: [detection-metrics.md](detection-metrics.md).
 
-1. **IoU (Intersection over Union):** the area two boxes share ÷ the total area they cover. It measures how well a
-   predicted box fits the ground-truth box. 1 = perfect, 0 = no overlap.
-2. **TP / FP / FN** (at a chosen IoU threshold, for example 0.5):
-   - **True Positive:** the right class and IoU ≥ threshold → a correct detection.
-   - **False Positive:** a box with nothing real under it, or one that fits too poorly → a false alarm.
-   - **False Negative:** a real object that no box found → a miss.
-3. **Precision = TP / (TP + FP):** of the boxes I drew, how many are real? (Few false alarms.)
-   **Recall = TP / (TP + FN):** of the real objects, how many did I find? (Few misses.)
-   n640: P 0.841, R 0.836.
-4. **Confidence threshold:** each box has a score from 0 to 1, and boxes below the cutoff are dropped. A higher
-   cutoff gives higher precision and lower recall, and a lower cutoff does the opposite. A single P/R pair depends on the cutoff.
-5. **PR curve and AP (Average Precision):** sweep the cutoff and plot precision against recall. AP = the area under
-   that curve (0–1). It summarizes all cutoffs in one number. AP is computed **per class**.
-6. **mAP (mean AP):** the average of the per-class APs. Every class counts equally, so one weak class (OtherVehicle)
-   pulls the total down.
-7. **mAP50:** mAP with IoU ≥ 0.5 counted as correct. Measures "found the object, roughly in the right place".
-   **mAP50-95:** mAP averaged over the IoU thresholds 0.50, 0.55, … 0.95. It also rewards **tight** boxes. It's the stricter,
-   standard metric and is always lower. n640: 0.882 vs 0.595.
+- **IoU:** the overlap between a predicted box and the ground-truth box (shared area ÷ total area). 1 = perfect.
+- **TP / FP / FN:** correct detection / false alarm / missed object, judged at an IoU threshold.
+- **Precision:** of the boxes drawn, the fraction that are real. **Recall:** of the real objects, the fraction found.
+  n640: P 0.841, R 0.836.
+- **PR curve:** precision plotted against recall as the confidence cutoff is lowered.
+- **AP:** the area under the PR curve, computed per class. High AP = real objects are ranked above false alarms.
+- **mAP:** the mean of the per-class APs. Every class counts equally.
+- **mAP50 / mAP50-95:** mAP with IoU ≥ 0.5 counted as correct / mAP averaged over IoU 0.50…0.95, which also rewards
+  tight boxes. n640: 0.882 / 0.595.
 
 ## Edge vs cloud
 

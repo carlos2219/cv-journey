@@ -26,7 +26,9 @@ Metrics are on the **val** split, all classes combined.
     difference smaller than about 0.03 between two runs may be noise.
   - Train losses were still going down at epoch 81 (box 1.15, cls 0.58). Val losses were flat (box ~1.23–1.25). The
     model is near its limit at this setup. More epochs would probably add only a little.
-  - mAP50 (0.882) is much higher than mAP50-95 (0.595). → *Open question: what does this gap say about box quality?*
+  - mAP50 (0.882) is much higher than mAP50-95 (0.595): the model finds the objects but its boxes are not tight. Small
+    objects make this worse: on a 10×20 px person, a 2 px shift drops IoU to about 0.67. For alerting on people, mAP50 and
+    recall are the metrics that matter (see docs/detection-metrics.md).
   - Per-class results are not checked yet. Expect OtherVehicle (0.6% of labels) to score poorly.
 - **Decision:** Run `yolo detect val` on `best.pt` to get the per-class table. Then test the hypothesis that small,
   far-away people need more pixels: train `n1280`, and train `s640` to compare a bigger model against more resolution.

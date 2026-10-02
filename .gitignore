@@ -10,6 +10,8 @@ wheels/
 data/
 *.pt
 
+#runs folder
+runs/
 
 # Virtual environments
 .venv

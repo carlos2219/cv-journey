@@ -13,7 +13,7 @@ and it reviews and explains.
 | 1 | Images are arrays: live video, color spaces, color-based tracking | ✅ |
 | 2 | Camera geometry: calibration, undistortion, measuring on a plane | ✅ |
 | 3 | Deep learning inference: YOLO on the webcam, latency per stage | ✅ |
-| 4 | Train my own detector on a custom dataset | ⏳ |
+| 4 | Train my own detector on a custom dataset | ✅ |
 | 5 | Edge deployment: ONNX, TensorRT, Docker, Jetson | ⏳ |
 
 Notes: [concepts glossary](docs/concepts.md) · [experiment log](EXPERIMENTS.md) · [ML workflow](docs/ml-workflow.md) · [commands](docs/commands.md)
@@ -84,3 +84,23 @@ Conclusions:
   The nano model is too small to keep the GPU busy.
 - Choosing a model means picking the largest one that fits the latency budget on the target hardware.
   On a Jetson, with a much weaker CPU, GPU inference with TensorRT will be essential.
+
+### Thermal UAV detector (Step 4)
+Fine-tuned YOLO11 (COCO-pretrained) on the [HIT-UAV](https://github.com/suojiashun/hit-uav-infrared-thermal-dataset)
+infrared dataset: 2029 / 290 / 579 train / val / test images taken from a drone at 60–130 m, 4 classes.
+Full run history: [EXPERIMENTS.md](EXPERIMENTS.md).
+
+| Run | Model | imgsz | Person recall (val) | mAP50 (val) | mAP50-95 (val) | Inference |
+|---|---|---|---|---|---|---|
+| **n640** | YOLO11n | 640 | **0.885** | 0.882 | 0.594 | **1.8 ms** |
+| n1280 | YOLO11n | 1280 | 0.872 | 0.891 | 0.615 | 5.7 ms |
+| s640 | YOLO11s | 640 | 0.858 | 0.898 | 0.612 | 3.1 ms |
+
+**Chosen model: n640.** Final score on the held-out **test** split: mAP50 **0.886**, Person recall **0.890**,
+Person mAP50 0.927 (close to val, so the model generalizes).
+
+Conclusions:
+- For people alerts, missed people are the critical error, so recall decides. A bigger model or a higher
+  resolution gave tighter boxes (mAP50-95) but did **not** find more people, so the smallest, fastest model wins.
+- Recall can still be raised without retraining by lowering the confidence threshold, at the cost of more false alarms.
+- OtherVehicle (148 training examples, 0.6%) scores worst: too few examples to learn from.

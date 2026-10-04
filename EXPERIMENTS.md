@@ -48,6 +48,10 @@ Metrics are on the **val** split, all classes combined, from `yolo detect val` o
   - Caveat: only one run per setting, and val was also used to pick the best epoch. The test split will give the final
     honest score.
   - *Open question: for a drone that alerts on people, is n1280 worth 3× the inference time?*
+  - **Answer (2026-10-03):** For people alerts, missed people (false negatives) are the critical error, so **recall**
+    is the metric that decides. n1280 did not improve Person recall, so on that criterion it is **not** worth 3× the
+    inference time. Its gain is tighter boxes (mAP50-95), which matters less for alerting.
+  - PR curves (n1280): **OtherVehicle sags the most**, as expected with only 148 training and 12 val examples.
 - **Decision:** Train `s640` (bigger model, same resolution) to see whether model capacity helps more than resolution.
 
 ## 2026-10-01 — n640

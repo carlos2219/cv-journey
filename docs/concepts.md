@@ -69,6 +69,8 @@ Organized by the step where each term first came up.
 
 ## Training (Step 4)
 
+Where each step fits in the standard ML workflow: [ml-workflow.md](ml-workflow.md).
+
 - **Fine-tuning:** start from a model already trained on a large dataset (COCO), then train it further on my
   data. This is much faster and needs less data than training from scratch.
 - **Epoch:** one full pass over all the training images. **Batch:** the number of images processed before each

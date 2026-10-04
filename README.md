@@ -16,7 +16,7 @@ and it reviews and explains.
 | 4 | Train my own detector on a custom dataset | ⏳ |
 | 5 | Edge deployment: ONNX, TensorRT, Docker, Jetson | ⏳ |
 
-Notes: [concepts glossary](docs/concepts.md) · [experiment log](EXPERIMENTS.md)
+Notes: [concepts glossary](docs/concepts.md) · [experiment log](EXPERIMENTS.md) · [ML workflow](docs/ml-workflow.md) · [commands](docs/commands.md)
 
 ## Setup
 

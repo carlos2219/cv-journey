@@ -6,7 +6,8 @@ Organized by the step where each term first came up.
 **Contents:** [Images and color](#images-and-color-step-1) ·
 [Camera geometry](#camera-geometry-step-2) · [Inference](#inference-step-3) ·
 [Datasets and labels](#datasets-and-labels-step-4) · [Training](#training-step-4) ·
-[Detection metrics](#detection-metrics-step-4) · [Edge vs cloud](#edge-vs-cloud)
+[Detection metrics](#detection-metrics-step-4) · [ML foundations](#ml-foundations-tier-1-item-2) ·
+[Edge vs cloud](#edge-vs-cloud)
 
 ---
 
@@ -98,6 +99,28 @@ Deep dive with a worked example: [detection-metrics.md](detection-metrics.md).
 - **mAP:** the mean of the per-class APs. Every class counts equally.
 - **mAP50 / mAP50-95:** mAP with IoU ≥ 0.5 counted as correct / mAP averaged over IoU 0.50…0.95, which also rewards
   tight boxes. n640: 0.882 / 0.595.
+
+## ML foundations (Tier 1, item 2)
+
+Deep dive in matrix form: [backprop.md](backprop.md).
+
+- **Tensor:** an n-dimensional array with a shape, dtype, device, and (optionally) gradient tracking. Batch first:
+  `(N, D)` for tabular data, `(N, C, H, W)` for images.
+- **Parameter / weight:** a number inside the model that training adjusts (`W`, `b`). YOLO11n has ~3 M of them.
+- **Forward pass:** running the model on an input to get the prediction and the loss.
+- **Broadcasting:** stretching a size-1 or missing dimension to match another shape (`(N, K) + (K,)`).
+- **Gradient:** ∂L/∂W, how the loss changes for a small change in each weight. Same shape as the weight.
+- **Upstream gradient G:** ∂L/∂(layer output), the gradient a layer receives from the layer above.
+- **Backprop:** the chain rule applied layer by layer from the loss back to the input. Each layer turns G into
+  gradients for its own weights (`XᵀG`) and a new G for the layer below (`GWᵀ`).
+- **Autograd:** PyTorch's automatic backprop. It records a graph during the forward pass, and `loss.backward()`
+  fills `.grad`.
+- **Training loop:** forward → loss → backward → update → zero the grads, repeated. On the motor bench it recovered
+  the true W from 200 noisy runs; the loss stopped at ~434 ≈ noise power (it can't learn noise).
+- **Learning rate (lr):** step size against the gradient. For a quadratic loss, each step is a discrete system with
+  poles 1 − 2·lr·λ → stable only if lr < 1/λ_max (≈ 0.83 on my bench). Too small = slow, too big = oscillation
+  or `inf`. Details: [backprop.md §6](backprop.md#6-the-learning-rate-as-a-pole).
+- **Gradient accumulation:** `backward()` adds into `.grad`. Without zeroing, my scalar grads went from −20 to −40.
 
 ## Edge vs cloud
 

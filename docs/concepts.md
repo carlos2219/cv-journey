@@ -120,6 +120,11 @@ Deep dive in matrix form: [backprop.md](backprop.md).
 - **Learning rate (lr):** step size against the gradient. For a quadratic loss, each step is a discrete system with
   poles 1 − 2·lr·λ → stable only if lr < 1/λ_max (≈ 0.83 on my bench). Too small = slow, too big = oscillation
   or `inf`. Details: [backprop.md §6](backprop.md#6-the-learning-rate-as-a-pole).
+- **nn.Linear(D, K):** a layer that owns its knobs. It stores `weight` as **(K, D) = (out, in)**, the transpose of
+  my W table, and computes `X @ weight.T + bias`. 4 sensors → 3 outputs: W (4, 3), `model.weight` (3, 4), bias (3,).
+- **Optimizer (SGD):** holds all the model's knobs. `step()` does θ ← θ − lr·grad and `zero_grad()` clears the grads.
+- **Noise floor:** the loss a perfect model still has, because noise is random and can't be predicted from the
+  inputs (motor bench: 20² + 0.1² ≈ 400, observed 434). A training loss far below it means memorized noise = overfitting.
 - **Gradient accumulation:** `backward()` adds into `.grad`. Without zeroing, my scalar grads went from −20 to −40.
 
 ## Edge vs cloud

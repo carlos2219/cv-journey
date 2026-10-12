@@ -2,8 +2,8 @@
 
 How a network computes its gradients, written for batches and matrices from the start. The scalar case
 `y = a·x + b` is the special case N = D = K = 1. Short definitions are in
-[concepts.md](concepts.md#ml-foundations-tier-1-item-2). Code: `ml_foundations/autograd_basics.py` (scalar),
-`ml_foundations/linear_backprop.py` (matrix).
+[concepts.md](concepts.md#ml-foundations-tier-1-item-2). Code: `ml_foundations/motor_regression.py` (loop by hand),
+`ml_foundations/motor_regression_nn.py` (`nn.Linear` + `torch.optim.SGD`).
 
 ## 0. Running example: a DC motor test bench
 
@@ -170,6 +170,7 @@ Motor bench (seed 0): λ ∈ [0.82, 1.21] → limit lr ≈ 0.83. My sweep (100 s
 
 | Script | Result |
 |---|---|
-| `autograd_basics.py` (scalar, x=2, y=7, a=1, b=0) | loss 25; grads (−20, −10); without zeroing → (−40, −20); update with lr 0.01 → a=1.4, b=0.2 |
-| `linear_backprop.py` (N=8, D=3, K=2) | shapes (8,2) (3,2) (2,); autograd grads match `XᵀG` and `ΣG` (W ok: True, b ok: True) |
+| scalar autograd check, script deleted (x=2, y=7, a=1, b=0) | loss 25; grads (−20, −10); without zeroing → (−40, −20); update with lr 0.01 → a=1.4, b=0.2 |
+| matrix gradient check, script deleted (N=8, D=3, K=2) | shapes (8,2) (3,2) (2,); autograd grads match `XᵀG` and `ΣG` (W ok: True, b ok: True) |
 | `motor_regression.py` (N=200, lr 0.1, 100 steps, knobs start at 0) | loss 2.33 M → 434 (flat from step ~50; floor ≈ noise power 20² + 0.1² ≈ 400). Learned W ≈ [[299.9, 0.196], [−151.1, 2.012], [−9.7, 0.086]] vs true [[300, 0.2], [−150, 2.0], [−10, 0.1]]; b ≈ (1499.1, 3.005) vs (1500, 3.0) |
+| `motor_regression_nn.py` (`nn.Linear`, SGD lr 0.1, random init) | step 0 loss 2 331 345 (vs 2 330 496 from zeros); from step 10 on identical to the manual loop; same learned W and b to 4 digits |

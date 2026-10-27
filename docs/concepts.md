@@ -127,6 +127,35 @@ Deep dive in matrix form: [backprop.md](backprop.md).
   inputs (motor bench: 20² + 0.1² ≈ 400, observed 434). A training loss far below it means memorized noise = overfitting.
 - **Gradient accumulation:** `backward()` adds into `.grad`. Without zeroing, my scalar grads went from −20 to −40.
 
+### Data pipeline (2.4)
+
+`labels on disk → build_index → CropsDataset[i] → DataLoader → (64, 1, 32, 32) batches`
+
+- **Detection vs classification:** YOLO answers *where* and *what* for many objects. My CNN gets one crop and answers
+  only *what* (Person / Car / Bicycle). It's the smallest task where I write the whole training loop myself.
+- **Sample:** one training example, here one 32 × 32 crop plus its label. HIT-UAV train has 17,416.
+- **Class pattern:** `__init__` runs once and stores data on `self`. The other methods read it under the same name.
+- **Dataset:** answers "how many?" (`__len__`) and "give me sample i" (`__getitem__`). It handles ONE sample per call,
+  so there's no loop inside. The DataLoader does the looping.
+- **Crop pipeline:** YOLO fractions × image size → pixel corners → `img[y1:y2, x1:x2]` (rows first) → resize 32 × 32
+  → `float / 255` (0..1) → `unsqueeze(0)` → `(1, 32, 32)`.
+- **Batch:** many samples stacked into one tensor. Batching adds one leading axis: `(1, 32, 32)` → `(64, 1, 32, 32)`,
+  and labels go from one int to `(64,)`. That's why every crop must be the same size.
+- **DataLoader:** `DataLoader(ds, batch_size=64, shuffle=True)`. 17,416 / 64 → 273 batches (the last one has 8;
+  `drop_last=True` would drop it).
+- **Epoch:** one full pass over all samples. `shuffle=True` gives a new random order every epoch.
+
+### Convolution (2.5, concepts)
+
+- **Kernel / filter:** a small grid of weights (usually 3 × 3) that slides over the image. At each position:
+  multiply element by element and sum → `Y[i, j] = Σ_a Σ_b K[a, b] · X[i+a, j+b] + bias`.
+  It's a spatial FIR filter.
+- **Example:** the row `0 0 9 9 9 0 0` with kernel `[-1 0 1]` gives `[9, 9, 0, -9, -9]`. It's an edge detector:
+  big where brightness changes, 0 where it's flat.
+- **Learned, not designed:** the kernel numbers are weights, adjusted by training like `W` on the motor bench.
+- **Feature map:** a kernel's output, showing where its pattern appears.
+- **Channels grow:** a layer with 16 kernels makes 16 feature maps: `(1, 32, 32)` → `(16, 32, 32)`.
+
 ## Edge vs cloud
 
 - **Edge:** running the model on the device itself (Jetson, MCU). It's fast, works offline, and keeps the data

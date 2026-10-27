@@ -38,5 +38,8 @@ if __name__ == "__main__":
     print(len(bs))
     print(bs[3])
     print(bs.count_by_class())
+    print(bs[-1])
+    print(bs[1:3])
     for box in bs:
         print(box)
+        

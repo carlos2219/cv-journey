@@ -1,8 +1,12 @@
 """Turn HIT-UAV boxes into a classification dataset: one sample per labeled object.
 
-Step A: build the sample index (no PyTorch yet).
+build_index lists every box; CropsDataset turns box i into a (1, 32, 32) float tensor + label.
 """
 from pathlib import Path
+
+import cv2
+import torch
+from torch.utils.data import DataLoader, Dataset
 
 from cv_journey.show_labels import DATA_DIR, label_path_for, read_labels
 
@@ -24,7 +28,33 @@ def build_index(split: str) -> list[Sample]:
     return samples  # function level: after ALL images
 
 
+class CropsDataset(Dataset):
+
+    def __init__(self, split):
+        self.samples = build_index(split)
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, index):
+        img_path, cls, (cx, cy, bw, bh) = self.samples[index]
+        img = cv2.imread(str(img_path), cv2.IMREAD_GRAYSCALE)
+        h, w = img.shape[:2]
+        x1 = round((cx - bw / 2) * w)
+        y1 = round((cy - bh / 2) * h)
+        x2 = round((cx + bw / 2) * w)
+        y2 = round((cy + bh / 2) * h)
+        crop = img[y1:y2, x1:x2]
+        crop = cv2.resize(crop, (32, 32))
+        x = torch.from_numpy(crop).float() / 255.0
+        x = x.unsqueeze(0)
+        return x, cls
+
+
 if __name__ == "__main__":
-    index = build_index("train")
-    print(f"{len(index)} train samples")
-    print("first:", index[0])
+    ds = CropsDataset("train")
+    loader = DataLoader(ds, batch_size=64, shuffle=True)
+    xb, yb = next(iter(loader))
+    print(xb.shape, yb.shape)
+    print(yb[:10])
+    print(len(loader))

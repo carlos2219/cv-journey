@@ -15,10 +15,12 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
 for epoch in range(5):
     model.train()
+    running_loss = 0.0
     for xb, yb in train_loader:
         optimizer.zero_grad()
         Y_hat = model(xb)
         L = loss_fn(Y_hat, yb)
+        running_loss += L.item() * len(yb)
         L.backward()
         optimizer.step()
     model.eval()
@@ -29,4 +31,4 @@ for epoch in range(5):
             logits = model(xb)
             correct += (logits.argmax(dim=1) == yb).sum().item()
             total += yb.numel()
-    print(f"epoch {epoch}  train loss {L.item():.3f}  val acc {correct / total:.3f}")
+    print(f"epoch {epoch}  train loss {running_loss / len(train_loader.dataset):.3f}  val acc {correct / total:.3f}")

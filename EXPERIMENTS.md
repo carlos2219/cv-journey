@@ -63,10 +63,12 @@ on val did not inflate the scores much. Any later tuning (e.g. `conf=` for recal
 - **Result:** val acc 0.815 → 0.829 → 0.835 → 0.825 → **0.866**.
 - **Notes:**
   - Baseline "always guess Person" = **0.478** on val, so 0.866 is real learning, not class imbalance.
-  - The printed train loss (1.126, 0.196, 0.211, 0.121, 0.504) is the loss of the **last batch only**, which has just
-    8 crops, so it's noise. Fix: average the loss over the epoch, weighting each batch by its size.
+  - The first printed train loss (1.126, 0.196, 0.211, 0.121, 0.504) was the loss of the **last batch only**, which has
+    just 8 crops, so it was noise. Fixed: epoch mean, weighting each batch by its size →
+    **0.555 → 0.432 → 0.383 → 0.352 → 0.328**, falling smoothly. Val acc is identical to the first run: logging doesn't
+    change training (same seed → same weight updates). ~15 s/epoch on CPU.
   - A random 3-class model should start near loss ln 3 ≈ 1.10, which is a quick check that the loss is wired correctly.
-- **Decision:** Average the train loss, commit, then a confusion matrix (hypothesis: Bicycle ↔ Person confusions).
+- **Decision:** Confusion matrix next (hypothesis: Bicycle ↔ Person confusions).
 
 ## 2026-10-03 — s640
 - **Goal:** Test whether a bigger model (more capacity) helps more than more resolution (n1280).

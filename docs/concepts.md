@@ -156,6 +156,24 @@ Deep dive in matrix form: [backprop.md](backprop.md).
 - **Feature map:** a kernel's output, showing where its pattern appears.
 - **Channels grow:** a layer with 16 kernels makes 16 feature maps: `(1, 32, 32)` → `(16, 32, 32)`.
 
+### CNN + training loop (2.5–2.6)
+
+- **Why a CNN, not `Linear` on pixels:** a kernel looks only at neighbors (local patterns) and reuses the same weights
+  everywhere (a pattern is found wherever it appears). Conv layers extract features; the final `Linear` decides.
+- **Shapes:** `(B,1,32,32)` → conv 8 → `(B,8,32,32)` → pool → `(B,8,16,16)` → conv 16 → pool → `(B,16,8,8)` →
+  flatten → `(B,1024)` → linear → `(B,3)`. Conv changes C; pool halves H, W.
+- **ReLU:** `max(0, x)`. Without it, stacked layers collapse into one linear map.
+- **MaxPool2d(2):** keeps the max of each 2 × 2 block, halving H and W.
+- **`nn.Module` class:** `__init__` builds the layers once; `forward` uses them on every `model(x)`.
+  `nn.Sequential(a, b, c)` chains the layers (they're arguments, so commas between them).
+- **Logits + CrossEntropyLoss:** the outputs are raw scores (logits); the loss applies softmax and penalizes a low
+  probability on the true class: `L = -ln p_true`. It takes logits `(B, C)` and int labels `(B,)`. Random start ≈ ln C.
+- **Loop:** two levels: `for epoch` (full passes) → `for xb, yb in loader` (one weight update per batch).
+- **Validation:** `model.eval()` + `torch.no_grad()`, loop over `val_loader`;
+  accuracy = `(logits.argmax(dim=1) == yb).sum() / total`.
+- **Always compare with a baseline:** majority class on val = 0.478, so 0.866 means something.
+- **Trap:** loop variables survive the loop. Using `xb` after the train loop silently measures a training batch.
+
 ## Edge vs cloud
 
 - **Edge:** running the model on the device itself (Jetson, MCU). It's fast, works offline, and keeps the data

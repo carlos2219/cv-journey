@@ -53,6 +53,21 @@ on val did not inflate the scores much. Any later tuning (e.g. `conf=` for recal
 
 ---
 
+## 2026-10-28 — SmallCNN crop classifier (ML foundations 2.6)
+- **Goal:** Train a small CNN from scratch to classify 32 × 32 thermal crops as Person / Car / Bicycle.
+- **Data:** `CropsDataset` (one sample per labeled box; OtherVehicle dropped). Train 17,416 crops
+  (8,533 / 5,253 / 3,630), val 2,441 (1,168 / 719 / 554).
+- **Model:** `ml_foundations/model.py`: conv(1→8) → ReLU → pool → conv(8→16) → ReLU → pool → flatten (1024) →
+  linear(3).
+- **Command:** `uv run python -m ml_foundations.train` (Adam lr 1e-3, batch 64, 5 epochs, seed 0, CPU)
+- **Result:** val acc 0.815 → 0.829 → 0.835 → 0.825 → **0.866**.
+- **Notes:**
+  - Baseline "always guess Person" = **0.478** on val, so 0.866 is real learning, not class imbalance.
+  - The printed train loss (1.126, 0.196, 0.211, 0.121, 0.504) is the loss of the **last batch only**, which has just
+    8 crops, so it's noise. Fix: average the loss over the epoch, weighting each batch by its size.
+  - A random 3-class model should start near loss ln 3 ≈ 1.10, which is a quick check that the loss is wired correctly.
+- **Decision:** Average the train loss, commit, then a confusion matrix (hypothesis: Bicycle ↔ Person confusions).
+
 ## 2026-10-03 — s640
 - **Goal:** Test whether a bigger model (more capacity) helps more than more resolution (n1280).
 - **Change vs n640:** `model=yolo11s.pt` (9.4 M parameters and 21.4 GFLOPs, vs about 2.6 M parameters for yolo11n). Everything else the same.

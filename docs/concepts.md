@@ -172,6 +172,8 @@ Deep dive in matrix form: [backprop.md](backprop.md).
 - **Validation:** `model.eval()` + `torch.no_grad()`, loop over `val_loader`;
   accuracy = `(logits.argmax(dim=1) == yb).sum() / total`.
 - **Always compare with a baseline:** majority class on val = 0.478, so 0.866 means something.
+- **Confusion matrix:** C × C counts, rows = true class, cols = predicted. Diagonal = correct.
+  Per-class recall = `cm.diag() / cm.sum(dim=1)`. Overall accuracy hides a weak minority class; this shows it.
 - **Trap:** loop variables survive the loop. Using `xb` after the train loop silently measures a training batch.
 
 ## Edge vs cloud

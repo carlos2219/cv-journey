@@ -68,7 +68,21 @@ on val did not inflate the scores much. Any later tuning (e.g. `conf=` for recal
     **0.555 → 0.432 → 0.383 → 0.352 → 0.328**, falling smoothly. Val acc is identical to the first run: logging doesn't
     change training (same seed → same weight updates). ~15 s/epoch on CPU.
   - A random 3-class model should start near loss ln 3 ≈ 1.10, which is a quick check that the loss is wired correctly.
-- **Decision:** Confusion matrix next (hypothesis: Bicycle ↔ Person confusions).
+- **Confusion matrix (2.7, val, epoch 4; rows = true, cols = predicted: Person / Car / Bicycle):**
+
+  |            | Person | Car | Bicycle | recall |
+  |------------|-------:|----:|--------:|-------:|
+  | Person     | 1097   | 30  | 41      | 0.94   |
+  | Car        | 36     | 652 | 31      | 0.91   |
+  | Bicycle    | 75     | 115 | 364     | **0.66** |
+
+  - Bicycle is the weak class, as predicted, but it is confused mostly with **Car** (115), not Person (75). The
+    Bicycle ↔ Person hypothesis was wrong.
+  - Bicycle recall swings between epochs (0.55, 0.55, 0.72, 0.45, 0.66) while Car recall moves the opposite way. The
+    model hasn't settled the Car/Bicycle boundary, and that swing explains most of the val-acc wobble.
+  - Open question: why Car? One candidate: resizing every crop to 32 × 32 throws away the object's real size in pixels,
+    so a small bicycle and a large car end up the same size.
+- **Decision:** Phase 1 (ML foundations) done. Not tuning this toy further.
 
 ## 2026-10-03 — s640
 - **Goal:** Test whether a bigger model (more capacity) helps more than more resolution (n1280).

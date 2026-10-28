@@ -25,10 +25,16 @@ for epoch in range(5):
         optimizer.step()
     model.eval()
     correct = 0
+    cm = torch.zeros(NUM_CLASSES, NUM_CLASSES, dtype=torch.int64)  # rows = true, cols = predicted
     total = 0
     with torch.no_grad():
         for xb, yb in val_loader:
             logits = model(xb)
-            correct += (logits.argmax(dim=1) == yb).sum().item()
+            preds = logits.argmax(dim=1)
+            for t, p in zip(yb, preds):
+                cm[t, p] += 1
+            correct += (preds == yb).sum().item()
             total += yb.numel()
+    print(cm)
+    print("recall per class:", cm.diag() / cm.sum(dim=1))
     print(f"epoch {epoch}  train loss {running_loss / len(train_loader.dataset):.3f}  val acc {correct / total:.3f}")
